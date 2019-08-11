@@ -796,7 +796,8 @@
 	},
 	"expanded_folders":
 	[
-		"/C/Users/William/Desktop/showcase_website"
+		"/C/Users/William/Desktop/showcase_website",
+		"/C/Users/William/Desktop/showcase_website/public_html"
 	],
 	"file_history":
 	[
@@ -978,8 +979,8 @@
 						"selection":
 						[
 							[
-								0,
-								0
+								45,
+								45
 							]
 						],
 						"settings":
