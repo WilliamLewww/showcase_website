@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<title>Vulkan Ray Tracing Tutorial</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+<style>
+  body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
+</style>
+<body class="w3-light-grey">
+
+<!-- w3-content defines a container for fixed size centered content, 
+and is wrapped around the whole page content, except for the footer in this example -->
+<div class="w3-content" style="max-width:1400px">
+
+<!-- Header -->
+<header class="w3-container w3-center w3-padding-32"> 
+  <h1><b>Vulkan Ray Tracing Tutorial (with Minimal Abstraction)</b></h1>
+  <p>By William Lew</p>
+</header>
+
+<!-- Grid -->
+<div class="w3-row">
+
+<!-- Blog entries -->
+<div class="w3-col">
+  <!-- Blog entry -->
+  <div class="w3-card-4 w3-margin w3-white">
+    <div class="w3-container">
+      <h3><b>Introduction to the Tutorial</b></h3>
+    </div>
+    <div class="w3-container">
+      <p>
+        This tutorial focuses specifically on the <b>VK_KHR_ray_tracing</b> extension for Vulkan. The tutorial will not cover in depth the general topics of Vulkan, but will describe all the procedures involving ray tracing; there are many great online resources for learning Vulkan so rather than rewriting their information, I will just provide the links to their websites.
+        <br>
+        <a href="https://vulkan-tutorial.com/">https://vulkan-tutorial.com/</a>
+        <br><br>
+        Unlike the other tutorials on the ray tracing extension, this tutorial implements the ray tracing extension in a single file with minimal abstraction. The other tutorials do an amazing job of encapsulating procedures, but sometimes it is easier to learn from a minimal implementation. 
+        <br><br>
+        Here are two amazing resources for Vulkan ray tracing:
+        <br>
+        <a href="https://nvpro-samples.github.io/vk_raytracing_tutorial_KHR/">https://nvpro-samples.github.io/vk_raytracing_tutorial_KHR/</a>
+        <br>
+        <a href="https://github.com/SaschaWillems/Vulkan/blob/master/examples/raytracingbasic/raytracingbasic.cpp">https://github.com/SaschaWillems/Vulkan/blob/master/examples/raytracingbasic/raytracingbasic.cpp</a>
+        <br><br>
+        Here is the link to the Github repository for the tutorial:
+        <br>
+        <a href="https://github.com/WilliamLewww/vulkan_ray_tracing_minimal_abstraction">https://github.com/WilliamLewww/vulkan_ray_tracing_minimal_abstraction</a>
+      </p>
+    </div>
+
+    <div class="w3-container">
+      <h3><b>Setting up the Environment</b></h3>
+    </div>
+    <div class="w3-container">
+      <h4><b>Device Compatibility</b></h4>
+      <p>
+        After installing the Vulkan SDK, you must check to see if the VK_KHR_ray_tracing extension is compatible with your GPU. To see if the extension is available with your device, you can use the <b>vulkaninfo</b> program.
+        <br><br>
+        Here is an example of using the <b>vulkaninfo</b> program in linux:
+        <br>
+        <div class="w3-card-4 w3-margin w3-white">
+          <p>
+            <b>$ vulkaninfo | grep VK_KHR_ray_tracing</b>
+            <br>
+            ERROR: [Loader Message] Code 0 : /usr/lib32/amdvlk32.so: wrong ELF class: ELFCLASS32
+            <br>
+            <b>VK_KHR_ray_tracing &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : extension revision 8</b>
+            <br>
+            <b>VK_KHR_ray_tracing &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : extension revision 8</b>
+          </p>
+        </div>
+        Windows has a graphical <b>vulkaninfo</b> program that is installed with the Vulkan SDK. Navagate through the menus and try to find if the device extension <b>VK_KHR_ray_tracing</b> is available.
+      </p>
+      <h4><b>Driver Compatibility</b></h4>
+      <p>
+      </p>
+    </div>
+  </div>
+  <hr>
+<!-- END BLOG ENTRIES -->
+</div>
+
+<!-- END GRID -->
+</div><br>
+
+<!-- END w3-content -->
+</div>
+
+</body>
+</html>
