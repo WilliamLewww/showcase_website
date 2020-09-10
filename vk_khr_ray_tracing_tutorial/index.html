@@ -31,6 +31,7 @@ and is wrapped around the whole page content, except for the footer in this exam
       <h3><b>Introduction to the Tutorial</b></h3>
     </div>
     <div class="w3-container">
+      <h4><b>Prerequisites and Resources</b></h4>
       <p>
         This tutorial focuses specifically on the <b>VK_KHR_ray_tracing</b> extension for Vulkan. The tutorial will not cover in depth the general topics of Vulkan, but will describe all the procedures involving ray tracing; there are many great online resources for learning Vulkan so rather than rewriting their information, I will just provide the links to their websites.
         <br>
@@ -48,15 +49,31 @@ and is wrapped around the whole page content, except for the footer in this exam
         <br>
         <a href="https://github.com/WilliamLewww/vulkan_ray_tracing_minimal_abstraction">https://github.com/WilliamLewww/vulkan_ray_tracing_minimal_abstraction</a>
       </p>
+      <h4><b>Tutorial Structure</b></h4>
+      <p>
+        There are two parts of this tutorial that will describe a different method for ray tracing.
+        <br><br>
+        The first approach is to use the <b>ray tracing pipeline</b> in which we will launch rays from the the <b>ray generation shader</b> and depending on the intersection, either a <b>ray hit shader</b> or a <b>ray miss shader</b> will handle the ray. This is a pure ray tracing approach in which the graphics pipeline is completely ignored; instead of using the graphics pipeline to rasterize primitives, the ray tracing pipeline will launch rays for each pixel of an image and resolve the pixel's color from the pixel's payload.
+        <br><br>
+        The second approach is the use <b>ray querying</b> in whcih we can launch rays from the <b>fragment shader</b>. This is a hybrid approach because the graphics pipeline is still involved by rasterizing primitives and launching rays from the rasterized primitives. In the <b>fragment shader</b>, we can grab the interpolated position of the rasterized primitive and then cast a ray from the position to test for shadows.
+      </p>
     </div>
 
     <div class="w3-container">
       <h3><b>Setting up the Environment</b></h3>
     </div>
     <div class="w3-container">
+      <h4><b>Driver Compatibility</b></h4>
+      <p>
+        Currently (9 September 2020), the VK_KHR_ray_tracing extension is only available with the Vulkan beta drivers. <b>Even if your device is compatable with the extension, your driver may not have the extension available</b>.
+        <br><br>
+        Here is the link to download the Vulkan beta drivers:
+        <br>
+        <a href="https://developer.nvidia.com/vulkan-driver">https://developer.nvidia.com/vulkan-driver</a>
+      </p>
       <h4><b>Device Compatibility</b></h4>
       <p>
-        After installing the Vulkan SDK, you must check to see if the VK_KHR_ray_tracing extension is compatible with your GPU. To see if the extension is available with your device, you can use the <b>vulkaninfo</b> program.
+        After installing the Vulkan SDK, you must check to see if the VK_KHR_ray_tracing extension is compatible with your GPU. To see if the extension is available with your device, you can use the <b>vulkaninfo</b> program. The <b>vulkaninfo</b> program may not display VK_KHR_ray_tracing if you are using incompatable drivers.
         <br><br>
         Here is an example of using the <b>vulkaninfo</b> program in linux:
         <br>
@@ -71,10 +88,7 @@ and is wrapped around the whole page content, except for the footer in this exam
             <b>VK_KHR_ray_tracing &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : extension revision 8</b>
           </p>
         </div>
-        Windows has a graphical <b>vulkaninfo</b> program that is installed with the Vulkan SDK. Navagate through the menus and try to find if the device extension <b>VK_KHR_ray_tracing</b> is available.
-      </p>
-      <h4><b>Driver Compatibility</b></h4>
-      <p>
+        Windows has a graphical <b>vulkaninfo</b> program that is installed with the Vulkan SDK. Navagate through the menus and check if the device extension <b>VK_KHR_ray_tracing</b> is available.
       </p>
     </div>
   </div>
