@@ -10,30 +10,22 @@
 </style>
 <body class="w3-light-grey">
 
-<!-- w3-content defines a container for fixed size centered content, 
-and is wrapped around the whole page content, except for the footer in this example -->
 <div class="w3-content" style="max-width:1400px">
 
-<!-- Header -->
 <header class="w3-container w3-center w3-padding-32"> 
   <h1><b>Vulkan Ray Tracing Tutorial (with Minimal Abstraction)</b></h1>
   <p>By William Lew</p>
 </header>
 
-<!-- Grid -->
 <div class="w3-row">
 
-<!-- Blog entries -->
 <div class="w3-col">
-  <!-- Blog entry -->
   <div class="w3-card-4 w3-margin w3-white">
     <div class="w3-container">
-      <h3><b>Introduction to the Tutorial</b></h3>
-    </div>
-    <div class="w3-container">
+      <h2><b>Introduction to the Tutorial</b></h2>
       <h4><b>Prerequisites and Resources</b></h4>
       <p>
-        This tutorial focuses specifically on the <b>VK_KHR_ray_tracing</b> extension for Vulkan. The tutorial will not cover in depth the general topics of Vulkan, but will describe all the procedures involving ray tracing; there are many great online resources for learning Vulkan so rather than rewriting their information, I will just provide the links to their websites.
+      	A basic understanding of Vulkan is recommended; this tutorial focuses specifically on the <b>VK_KHR_ray_tracing</b> extension for Vulkan. The tutorial will not cover in depth the general topics of Vulkan, but will describe all the procedures involving ray tracing; there are many great online resources for learning Vulkan so rather than rewriting their information, I will just provide the links to their websites.
         <br>
         <a href="https://vulkan-tutorial.com/">https://vulkan-tutorial.com/</a>
         <br><br>
@@ -51,21 +43,19 @@ and is wrapped around the whole page content, except for the footer in this exam
       </p>
       <h4><b>Tutorial Structure</b></h4>
       <p>
-        There are two parts of this tutorial that will describe a different method for ray tracing.
+        There are two parts of this tutorial that will describe a different method for Vulkan ray tracing.
         <br><br>
         The first approach is to use the <b>ray tracing pipeline</b> in which we will launch rays from the the <b>ray generation shader</b> and depending on the intersection, either a <b>ray hit shader</b> or a <b>ray miss shader</b> will handle the ray. This is a pure ray tracing approach in which the graphics pipeline is completely ignored; instead of using the graphics pipeline to rasterize primitives, the ray tracing pipeline will launch rays for each pixel of an image and resolve the pixel's color from the pixel's payload.
         <br><br>
-        The second approach is the use <b>ray querying</b> in whcih we can launch rays from the <b>fragment shader</b>. This is a hybrid approach because the graphics pipeline is still involved by rasterizing primitives and launching rays from the rasterized primitives. In the <b>fragment shader</b>, we can grab the interpolated position of the rasterized primitive and then cast a ray from the position to test for shadows.
+        The second approach is the use <b>ray querying</b> in which we can launch rays from the <b>fragment shader</b>. This is a hybrid approach because the graphics pipeline is still involved by rasterizing primitives and launching rays from the rasterized primitives. In the <b>fragment shader</b>, we can grab the interpolated position of the rasterized primitive and then cast a ray from the position to, for example, test for shadows.
       </p>
     </div>
 
     <div class="w3-container">
-      <h3><b>Setting up the Environment</b></h3>
-    </div>
-    <div class="w3-container">
+      <h2><b>Setting up the Environment</b></h2>
       <h4><b>Driver Compatibility</b></h4>
       <p>
-        Currently (9 September 2020), the VK_KHR_ray_tracing extension is only available with the Vulkan beta drivers. <b>Even if your device is compatable with the extension, your driver may not have the extension available</b>.
+        Currently (9 September 2020), the VK_KHR_ray_tracing extension is only available with the Vulkan beta drivers. <b>Even if your device is compatible with the extension, your driver may not have the extension available</b>.
         <br><br>
         Here is the link to download the Vulkan beta drivers:
         <br>
@@ -73,7 +63,7 @@ and is wrapped around the whole page content, except for the footer in this exam
       </p>
       <h4><b>Device Compatibility</b></h4>
       <p>
-        After installing the Vulkan SDK, you must check to see if the VK_KHR_ray_tracing extension is compatible with your GPU. To see if the extension is available with your device, you can use the <b>vulkaninfo</b> program. The <b>vulkaninfo</b> program may not display VK_KHR_ray_tracing if you are using incompatable drivers.
+        After installing the Vulkan SDK, you must check to see if the VK_KHR_ray_tracing extension is compatible with your GPU. To see if the extension is available with your device, you can use the <b>vulkaninfo</b> program. The <b>vulkaninfo</b> program may not display VK_KHR_ray_tracing if you are using incompatible drivers.
         <br><br>
         Here is an example of using the <b>vulkaninfo</b> program in linux:
         <br>
@@ -88,18 +78,206 @@ and is wrapped around the whole page content, except for the footer in this exam
             <b>VK_KHR_ray_tracing &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : extension revision 8</b>
           </p>
         </div>
-        Windows has a graphical <b>vulkaninfo</b> program that is installed with the Vulkan SDK. Navagate through the menus and check if the device extension <b>VK_KHR_ray_tracing</b> is available.
+        Windows has a graphical <b>vulkaninfo</b> program that is installed with the Vulkan SDK. Navigate through the menus and check if the device extension <b>VK_KHR_ray_tracing</b> is available.
       </p>
     </div>
   </div>
   <hr>
-<!-- END BLOG ENTRIES -->
 </div>
 
-<!-- END GRID -->
+<div class="w3-col">
+  <div class="w3-card-4 w3-margin w3-white">
+    <div class="w3-container">
+      <h2><b>Ray Tracing Pipeline</b></h2>
+      <h4><b>Program Procedure</b></h4>
+      <p>
+        We first need to make sure we include the correct headers. Since we are using a <b>beta extension</b> we need to define <b>VK_ENABLE_BETA_EXTENSIONS</b>. We are also using <b>tinyobjloader-c</b> to load <b>.obj</b> models so we also need to include its header file.
+        <br>
+        <b>(main.c: 1)</b>
+        <div class="w3-card-4 w3-margin w3-white">
+<pre><code style="font-size: 12px">#define VK_ENABLE_BETA_EXTENSIONS
+#include &lt;vulkan/vulkan.h&gt;
+#include &lt;GLFW/glfw3.h&gt;
+
+#define TINYOBJ_LOADER_C_IMPLEMENTATION
+#include "tinyobj_loader_c.h"
+</code></pre>
+        </div>
+        Let's take a look at the main function.
+        <br>
+        <b>(main.c: 1936)</b>
+        <div class="w3-card-4 w3-margin w3-white">
+<pre><code style="font-size: 12px">int main(void) {
+  struct VulkanApplication* app = (struct VulkanApplication*)malloc(sizeof(struct VulkanApplication));
+  struct Scene* scene = (struct Scene*)malloc(sizeof(struct Scene));
+
+  struct Camera* camera = &(struct Camera) {
+    .position = {
+      0, 0, 0, 1
+    },
+    .right = {
+      1, 0, 0, 1
+    },
+    .up = {
+      0, 1, 0, 1
+    },
+    .forward = {
+      0, 0, 1, 1
+    },
+
+    .frameCount = 0,
+  };
+
+  initializeScene(scene, "res/cube_scene.obj");
+
+  initializeVulkanContext(app);
+  pickPhysicalDevice(app);
+  createLogicalConnection(app);
+  createSwapchain(app);  
+  createCommandPool(app);
+  createVertexBuffer(app, scene);
+  createIndexBuffer(app, scene);
+  createMaterialBuffers(app, scene);
+  createTextures(app);
+
+  createAccelerationStructure(app, scene);
+  bindAccelerationStructure(app);
+  buildAccelerationStructure(app, scene);
+  createTopLevelAccelerationStructure(app);
+
+  createUniformBuffer(app);
+  createDescriptorSets(app);
+
+  createRayTracePipeline(app);
+  createShaderBindingTable(app);
+  createCommandBuffers(app);
+
+  createSynchronizationObjects(app);
+
+  runMainLoop(app, camera);
+
+  cleanUp(app, scene);
+
+  free(app);
+  free(scene);
+  
+  return 0;
+}
+</code></pre>
+        </div>
+        <br>
+        <h4><b>Allocating Structure Memory and Importing Scene</b></h4>
+        First, the memory for a <b>VulkanApplication</b> structure is allocated. The <b>VulkanApplication</b> structure contains all the required data for our application (E.g.: vertex buffers, images, ray tracing pipeline, etc...).
+        <br>
+        <b>(main.c: 1937)</b>
+        <div class="w3-card-4 w3-margin w3-white">
+<pre><code style="font-size: 12px">struct VulkanApplication* app = (struct VulkanApplication*)malloc(sizeof(struct VulkanApplication));</code></pre>
+        </div>
+        Then, the memory for a <b>Scene</b> structure is allocated to store the data from an <b>.obj</b> file.
+        <br>
+        <b>(main.c: 1938)</b>
+        <div class="w3-card-4 w3-margin w3-white">
+<pre><code style="font-size: 12px">struct Scene* scene = (struct Scene*)malloc(sizeof(struct Scene));</code></pre>
+        </div>
+        The memory for a <b>Camera</b> structure is allocated so the data can be easily copied to the uniform buffer that is later used in the shaders.
+        <br>
+        <b>(main.c: 1940)</b>
+        <div class="w3-card-4 w3-margin w3-white">
+<pre><code style="font-size: 12px">struct Camera* camera = &(struct Camera) {
+  .position = {
+    0, 0, 0, 1
+  },
+  .right = {
+    1, 0, 0, 1
+  },
+  .up = {
+    0, 1, 0, 1
+  },
+  .forward = {
+    0, 0, 1, 1
+  },
+
+  .frameCount = 0,
+};
+</code></pre>
+        </div>
+        The <b>initializeScene</b> function is called with the <b>scene</b> we recently allocated and a string that contains the path to an <b>.obj</b> file. The function calls the <b>tinyobjloader-c</b> functions which in turn store the <b>.obj</b> mesh into the <b>scene</b>.
+        <br>
+        <b>(main.c: 1957)</b>
+        <div class="w3-card-4 w3-margin w3-white">
+<pre><code style="font-size: 12px">initializeScene(scene, "res/cube_scene.obj");</code></pre>
+        </div>
+        <br>
+        <h4><b>Standard Vulkan Setup</b></h4>
+        <h6><b>Initialize Vulkan Context</b></h6>
+        When initializing Vulkan, we must make sure to include Vulkan instance extension that is required to use the VK_KHR_ray_tracing extension. In this case, we include the <b>VK_KHR_get_physical_device_properties2</b> extension to our array of instance extensions.
+        <br>
+        <b>(main.c: 287)</b>
+        <div class="w3-card-4 w3-margin w3-white">
+<pre><code style="font-size: 12px">extensionNames[glfwExtensionCount] = "VK_KHR_get_physical_device_properties2";</code></pre>
+        </div>
+        <h6><b>Pick Physical Device</b></h6>
+        The code assumes that the only (or first) available device is compatible with the VK_KHR_ray_tracing extension. If you are using multiple devices, you might need to refactor the code to select the device that is compatible with the extension.
+        <h6><b>Create Logical Connection</b></h6>
+        Just like when initializing Vulkan, we must make sure to include the device extensions that are required to use the VK_KHR_ray_tracing extension. The extensions we will be using can be seen in the snippet below.
+        <br>
+        <b>(main.c: 397)</b>
+        <div class="w3-card-4 w3-margin w3-white">
+<pre><code style="font-size: 12px">deviceEnabledExtensionNames[0] = VK_KHR_SWAPCHAIN_EXTENSION_NAME;  
+deviceEnabledExtensionNames[1] = "VK_KHR_ray_tracing";  
+deviceEnabledExtensionNames[2] = "VK_KHR_get_memory_requirements2";
+deviceEnabledExtensionNames[3] = "VK_EXT_descriptor_indexing";
+deviceEnabledExtensionNames[4] = "VK_KHR_buffer_device_address";
+deviceEnabledExtensionNames[5] = "VK_KHR_deferred_host_operations";
+deviceEnabledExtensionNames[6] = "VK_KHR_pipeline_library";
+deviceEnabledExtensionNames[7] = "VK_KHR_maintenance3";
+</code></pre>
+        </div>
+        A compute queue must be initialized because we will later use it when building the acceleration structure.
+        <br><br>
+        We must also make sure the ray tracing features and a couple other sets of features are enabled. We will be using the <b>VkPhysicalDeviceBufferDeviceAddressFeatures</b> features to get the device address of the vertex buffer so we can pass it to the acceleration structure.
+        <br>
+        <b>(main.c: 431)</b>
+        <div class="w3-card-4 w3-margin w3-white">
+<pre><code style="font-size: 12px">VkPhysicalDeviceBufferDeviceAddressFeaturesEXT bufferDeviceAddressFeatures = {};
+bufferDeviceAddressFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES_EXT;  
+bufferDeviceAddressFeatures.bufferDeviceAddress = VK_TRUE;
+
+VkPhysicalDeviceRayTracingFeaturesKHR rayTracingFeatures = {};
+rayTracingFeatures.pNext = &bufferDeviceAddressFeatures;
+rayTracingFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_FEATURES_KHR;
+rayTracingFeatures.rayTracing = VK_TRUE;
+rayTracingFeatures.rayQuery = VK_TRUE;
+</code></pre>
+        </div>
+        <h6><b>Create Swapchain</b></h6>
+        When creating the swapchain, the swapchain image usage flags must be set to both <b>VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT</b> and <b>VK_IMAGE_USAGE_TRANSFER_DST_BIT</b>. The ray tracing shaders will write to a ray traced image, but we will need to copy that separate image to an image on the swap chain so we can present it to the window. If we do not specify <b>VK_IMAGE_USAGE_TRANSFER_DST_BIT</b> we will be unable to copy the ray traced image to the swap chain image.
+        <br>
+        <b>(main.c: 496)</b>
+        <div class="w3-card-4 w3-margin w3-white">
+<pre><code style="font-size: 12px">swapchainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;</code></pre>
+				</div>
+				<h6><b>Create Command Pool</b></h6>
+				No special changes need to be made to enable Vulkan ray tracing.
+				<h6><b>Create Vertex Buffer</b></h6>
+      </p>
+    </div>
+  </div>
+  <hr>
+</div>
+
+<div class="w3-col">
+  <div class="w3-card-4 w3-margin w3-white">
+    <div class="w3-container">
+      <h2><b>Ray Query</b></h2>
+      <h4><b>Work in Progress</b></h4>
+    </div>
+  </div>
+  <hr>
+</div>
+
 </div><br>
 
-<!-- END w3-content -->
 </div>
 
 </body>
