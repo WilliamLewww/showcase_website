@@ -43,7 +43,7 @@
       </p>
       <h4><b>Tutorial Structure</b></h4>
       <p>
-        There are two parts of this tutorial that will describe a different method for Vulkan ray tracing.
+        There are two parts of this tutorial that will describe a different method for Vulkan ray tracing. You should view the code on github while reading the tutorial; the majority of the code in this tutorial is heavily truncated for simplicity.
         <br><br>
         The first approach is to use the <b>ray tracing pipeline</b> in which we will launch rays from the the <b>ray generation shader</b> and depending on the intersection, either a <b>ray hit shader</b> or a <b>ray miss shader</b> will handle the ray. This is a pure ray tracing approach in which the graphics pipeline is completely ignored; instead of using the graphics pipeline to rasterize primitives, the ray tracing pipeline will launch rays for each pixel of an image and resolve the pixel's color from the pixel's payload.
         <br><br>
@@ -95,7 +95,7 @@
         <br>
         <b>(main.c: 1)</b>
         <div class="w3-card-4 w3-margin w3-white">
-<pre><code style="font-size: 12px">#define VK_ENABLE_BETA_EXTENSIONS
+<pre><code style="font-size: 12px; white-space: pre-wrap;">#define VK_ENABLE_BETA_EXTENSIONS
 #include &lt;vulkan/vulkan.h&gt;
 #include &lt;GLFW/glfw3.h&gt;
 
@@ -107,7 +107,7 @@
         <br>
         <b>(main.c: 1936)</b>
         <div class="w3-card-4 w3-margin w3-white">
-<pre><code style="font-size: 12px">int main(void) {
+<pre><code style="font-size: 12px; white-space: pre-wrap;">int main(void) {
   struct VulkanApplication* app = (struct VulkanApplication*)malloc(sizeof(struct VulkanApplication));
   struct Scene* scene = (struct Scene*)malloc(sizeof(struct Scene));
 
@@ -171,19 +171,19 @@
         <br>
         <b>(main.c: 1937)</b>
         <div class="w3-card-4 w3-margin w3-white">
-<pre><code style="font-size: 12px">struct VulkanApplication* app = (struct VulkanApplication*)malloc(sizeof(struct VulkanApplication));</code></pre>
+<pre><code style="font-size: 12px; white-space: pre-wrap;">struct VulkanApplication* app = (struct VulkanApplication*)malloc(sizeof(struct VulkanApplication));</code></pre>
         </div>
         Then, the memory for a <b>Scene</b> structure is allocated to store the data from an <b>.obj</b> file.
         <br>
         <b>(main.c: 1938)</b>
         <div class="w3-card-4 w3-margin w3-white">
-<pre><code style="font-size: 12px">struct Scene* scene = (struct Scene*)malloc(sizeof(struct Scene));</code></pre>
+<pre><code style="font-size: 12px; white-space: pre-wrap;">struct Scene* scene = (struct Scene*)malloc(sizeof(struct Scene));</code></pre>
         </div>
         The memory for a <b>Camera</b> structure is allocated so the data can be easily copied to the uniform buffer that is later used in the shaders.
         <br>
         <b>(main.c: 1940)</b>
         <div class="w3-card-4 w3-margin w3-white">
-<pre><code style="font-size: 12px">struct Camera* camera = &(struct Camera) {
+<pre><code style="font-size: 12px; white-space: pre-wrap;">struct Camera* camera = &(struct Camera) {
   .position = {
     0, 0, 0, 1
   },
@@ -205,16 +205,16 @@
         <br>
         <b>(main.c: 1957)</b>
         <div class="w3-card-4 w3-margin w3-white">
-<pre><code style="font-size: 12px">initializeScene(scene, "res/cube_scene.obj");</code></pre>
+<pre><code style="font-size: 12px; white-space: pre-wrap;">initializeScene(scene, "res/cube_scene.obj");</code></pre>
         </div>
         <br>
-        <h4><b>Standard Vulkan Setup</b></h4>
+        <h4><b>Vulkan Setup</b></h4>
         <h6><b>Initialize Vulkan Context</b></h6>
         When initializing Vulkan, we must make sure to include Vulkan instance extension that is required to use the VK_KHR_ray_tracing extension. In this case, we include the <b>VK_KHR_get_physical_device_properties2</b> extension to our array of instance extensions.
         <br>
         <b>(main.c: 287)</b>
         <div class="w3-card-4 w3-margin w3-white">
-<pre><code style="font-size: 12px">extensionNames[glfwExtensionCount] = "VK_KHR_get_physical_device_properties2";</code></pre>
+<pre><code style="font-size: 12px; white-space: pre-wrap;">extensionNames[glfwExtensionCount] = "VK_KHR_get_physical_device_properties2";</code></pre>
         </div>
         <h6><b>Pick Physical Device</b></h6>
         The code assumes that the only (or first) available device is compatible with the VK_KHR_ray_tracing extension. If you are using multiple devices, you might need to refactor the code to select the device that is compatible with the extension.
@@ -223,7 +223,7 @@
         <br>
         <b>(main.c: 397)</b>
         <div class="w3-card-4 w3-margin w3-white">
-<pre><code style="font-size: 12px">deviceEnabledExtensionNames[0] = VK_KHR_SWAPCHAIN_EXTENSION_NAME;  
+<pre><code style="font-size: 12px; white-space: pre-wrap;">deviceEnabledExtensionNames[0] = VK_KHR_SWAPCHAIN_EXTENSION_NAME;  
 deviceEnabledExtensionNames[1] = "VK_KHR_ray_tracing";  
 deviceEnabledExtensionNames[2] = "VK_KHR_get_memory_requirements2";
 deviceEnabledExtensionNames[3] = "VK_EXT_descriptor_indexing";
@@ -239,7 +239,7 @@ deviceEnabledExtensionNames[7] = "VK_KHR_maintenance3";
         <br>
         <b>(main.c: 431)</b>
         <div class="w3-card-4 w3-margin w3-white">
-<pre><code style="font-size: 12px">VkPhysicalDeviceBufferDeviceAddressFeaturesEXT bufferDeviceAddressFeatures = {};
+<pre><code style="font-size: 12px; white-space: pre-wrap;">VkPhysicalDeviceBufferDeviceAddressFeaturesEXT bufferDeviceAddressFeatures = {};
 bufferDeviceAddressFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES_EXT;  
 bufferDeviceAddressFeatures.bufferDeviceAddress = VK_TRUE;
 
@@ -255,11 +255,302 @@ rayTracingFeatures.rayQuery = VK_TRUE;
         <br>
         <b>(main.c: 496)</b>
         <div class="w3-card-4 w3-margin w3-white">
-<pre><code style="font-size: 12px">swapchainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;</code></pre>
+<pre><code style="font-size: 12px; white-space: pre-wrap;">swapchainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;</code></pre>
 				</div>
 				<h6><b>Create Command Pool</b></h6>
 				No special changes need to be made to enable Vulkan ray tracing.
 				<h6><b>Create Vertex Buffer</b></h6>
+				In order to use the vertex buffer for the acceleration structure, we must enable the <b>VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT</b> usage flag when creating the buffer. This will allow us to pass the device address of the vertex buffer to the acceleration structure we will create later. The <b>scene</b> stores the vertices of the <b>.obj</b> file in a data member named <b>attributes</b> and all we need to do is copy the vertex data into the device buffer memory.
+				<br>
+				<b>(main.c: 546)</b>
+        <div class="w3-card-4 w3-margin w3-white">
+<pre><code style="font-size: 12px; white-space: pre-wrap;">void* positionData;
+vkMapMemory(app->logicalDevice, positionStagingBufferMemory, 0, positionBufferSize, 0, &positionData);
+memcpy(positionData, scene->attributes.vertices, positionBufferSize);
+vkUnmapMemory(app->logicalDevice, positionStagingBufferMemory);
+</code></pre>
+				</div>
+				<h6><b>Create Index Buffer</b></h6>
+				Just like when creating the vertex buffer, we need to enable the <b>VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT</b> usage flag when creating the buffer. The <b>scene</b> also holds the index buffer data so we can just copy the data into the buffer. Since we are only using the position index in this example, we just need to extract the position indices from the <b>scene</b>.
+				<br>
+				<b>(main.c: 562)</b>
+        <div class="w3-card-4 w3-margin w3-white">
+<pre><code style="font-size: 12px; white-space: pre-wrap;">uint32_t* positionIndices = (uint32_t*)malloc(bufferSize);
+for (int x = 0; x < scene->attributes.num_faces; x++) {
+  positionIndices[x] = scene->attributes.faces[x].v_idx;
+}
+</code></pre>
+				</div>
+				<h6><b>Create Materials Buffer</b></h6>
+				To determine the color, reflectance, emission, etc... of a surface, we will copy the materials from the <b>.mtl</b> file into a material buffer so we can use the surface materials in the shaders. The <b>tinyobjloader-c</b> automatically parses the <b>.mtl</b> file when parsing a <b>.obj</b> file so no extra steps need to be taken.
+				<br>
+				<b>(main.c: 607)</b>
+        <div class="w3-card-4 w3-margin w3-white">
+<pre><code style="font-size: 12px; white-space: pre-wrap;">struct Material* materials = (struct Material*)malloc(materialBufferSize);
+for (int x = 0; x < scene->numMaterials; x++) {
+  memcpy(materials[x].ambient, scene->materials[x].ambient, sizeof(float) * 3);
+  memcpy(materials[x].diffuse, scene->materials[x].diffuse, sizeof(float) * 3);
+  memcpy(materials[x].specular, scene->materials[x].specular, sizeof(float) * 3);
+  memcpy(materials[x].emission, scene->materials[x].emission, sizeof(float) * 3);
+}
+</code></pre>
+				</div>
+				<h6><b>Create Textures</b></h6>
+				We create a ray traced image that will be used to store the ray's final color value. 
+				<br><br>
+				To present or display the image, we will copy the ray traced image to the swapchain. We need to enable the <b>VK_IMAGE_USAGE_TRANSFER_SRC_BIT</b> usage flag so it can be used as a source of a copy function. The shaders will read and write to the ray traced image so we need to add <b>VK_IMAGE_USAGE_STORAGE_BIT</b> to its usage flag.
+				<br>
+				<b>(main.c: 635)</b>
+        <div class="w3-card-4 w3-margin w3-white">
+<pre><code style="font-size: 12px; white-space: pre-wrap;">createImage(
+	app, 
+	800, 
+	600, 
+	app->swapchainImageFormat, 
+	VK_IMAGE_TILING_OPTIMAL, 
+	VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_STORAGE_BIT, 
+	VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 
+	&app->rayTraceImage, 
+	&app->rayTraceImageMemory
+);
+</code></pre>
+				</div>
+				<br>
+        <h4><b>Acceleration Structure Setup</b></h4>
+        <h6><b>Create Bottom Level Acceleration Structure</b></h6>
+        Creating the bottom level acceleration structure defines the acceleration structure's configuration. We must specify the primitive count, index type, vertex count, and vertex format when creating the bottom level acceleration structure. 
+        <br>
+        <b>(main.c: 695)</b>
+        <div class="w3-card-4 w3-margin w3-white">
+<pre><code style="font-size: 12px; white-space: pre-wrap;">VkAccelerationStructureCreateGeometryTypeInfoKHR geometryInfos = {};
+geometryInfos.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_GEOMETRY_TYPE_INFO_KHR;
+geometryInfos.geometryType = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
+geometryInfos.maxPrimitiveCount = scene->attributes.num_face_num_verts;
+geometryInfos.indexType = VK_INDEX_TYPE_UINT32;
+geometryInfos.maxVertexCount = scene->attributes.num_vertices;
+geometryInfos.vertexFormat = VK_FORMAT_R32G32B32_SFLOAT;
+geometryInfos.allowsTransforms = VK_FALSE;
+</code></pre>
+				</div>
+				<h6><b>Bind Bottom Level Acceleration Structure</b></h6>
+				Now that we have the configuration of the acceleration structure, we need to bind it so we can build it using geometry from a vertex and index buffer.
+				<h6><b>Build Bottom Level Acceleration Structure</b></h6>
+				First, we need to get the device address of the vertex and index buffer.
+				<br>
+				<b>(main.c: 753)</b>
+        <div class="w3-card-4 w3-margin w3-white">
+<pre><code style="font-size: 12px; white-space: pre-wrap;">VkBufferDeviceAddressInfo vertexBufferDeviceAddressInfo = {};
+vertexBufferDeviceAddressInfo.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
+vertexBufferDeviceAddressInfo.buffer = app->vertexPositionBuffer;
+
+VkDeviceAddress vertexBufferAddress = pvkGetBufferDeviceAddressKHR(app->logicalDevice, &vertexBufferDeviceAddressInfo);
+
+VkDeviceOrHostAddressConstKHR vertexDeviceOrHostAddressConst = {};
+vertexDeviceOrHostAddressConst.deviceAddress = vertexBufferAddress;
+
+VkBufferDeviceAddressInfo indexBufferDeviceAddressInfo = {};
+indexBufferDeviceAddressInfo.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
+indexBufferDeviceAddressInfo.buffer = app->indexBuffer;
+
+VkDeviceAddress indexBufferAddress = pvkGetBufferDeviceAddressKHR(app->logicalDevice, &indexBufferDeviceAddressInfo);
+
+VkDeviceOrHostAddressConstKHR indexDeviceOrHostAddressConst = {};
+indexDeviceOrHostAddressConst.deviceAddress = indexBufferAddress;
+</code></pre>
+				</div>
+				Now we can set the acceleration structure geometry to use the addresses.
+				<br>
+				<b>(main.c: 771)</b>
+        <div class="w3-card-4 w3-margin w3-white">
+<pre><code style="font-size: 12px; white-space: pre-wrap;">VkAccelerationStructureGeometryTrianglesDataKHR trianglesData = {};
+trianglesData.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_TRIANGLES_DATA_KHR;
+trianglesData.pNext = NULL;
+trianglesData.vertexFormat = VK_FORMAT_R32G32B32_SFLOAT;
+trianglesData.vertexData = vertexDeviceOrHostAddressConst;
+trianglesData.vertexStride = sizeof(float) * 3;
+trianglesData.indexType = VK_INDEX_TYPE_UINT32;
+trianglesData.indexData = indexDeviceOrHostAddressConst;
+trianglesData.transformData = (VkDeviceOrHostAddressConstKHR){}; 
+</code></pre>
+				</div>
+				Building an acceleration structures requires extra memory; we need to create a scratch buffer and provide its device address to the geometry information structure.
+				<br>
+				<b>(main.c: 818)</b>
+        <div class="w3-card-4 w3-margin w3-white">
+<pre><code style="font-size: 12px; white-space: pre-wrap;">VkBuffer scratchBuffer;
+VkDeviceMemory scratchBufferMemory;
+createBuffer(app, scratchSize, VK_BUFFER_USAGE_RAY_TRACING_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &scratchBuffer, &scratchBufferMemory);
+
+VkBufferDeviceAddressInfo scratchBufferDeviceAddressInfo = {};
+scratchBufferDeviceAddressInfo.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
+scratchBufferDeviceAddressInfo.buffer = scratchBuffer;
+
+VkDeviceAddress scratchBufferAddress = pvkGetBufferDeviceAddressKHR(app->logicalDevice, &scratchBufferDeviceAddressInfo);
+
+VkDeviceOrHostAddressKHR scratchDeviceOrHostAddress = {};
+scratchDeviceOrHostAddress.deviceAddress = scratchBufferAddress;
+
+const VkAccelerationStructureBuildGeometryInfoKHR* buildGeometryInfo = &(VkAccelerationStructureBuildGeometryInfoKHR){
+  .sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR,
+  .pNext = NULL,
+  .type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR,
+  .flags = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR,
+  .update = VK_FALSE,
+  .srcAccelerationStructure = VK_NULL_HANDLE,
+  .dstAccelerationStructure = app->bottomLevelAccelerationStructure,
+  .geometryArrayOfPointers = VK_TRUE,
+  .geometryCount = 1,
+  .ppGeometries = geometries,
+  .scratchData = scratchDeviceOrHostAddress
+};
+
+const VkAccelerationStructureBuildOffsetInfoKHR* buildOffsetInfoPtr = &(VkAccelerationStructureBuildOffsetInfoKHR){
+  .primitiveCount = scene->attributes.num_face_num_verts,
+  .primitiveOffset = 0,
+  .firstVertex = 0,
+  .transformOffset = 0  
+};
+const VkAccelerationStructureBuildOffsetInfoKHR** buildOffsetInfos = &buildOffsetInfoPtr;
+</code></pre>
+				</div>
+				After setting up the all the structures, we need to actually build the acceleration structure; we pass the build acceleration structure command to the command buffer. The process is basically the same as creating, binding, and building the bottom level acceleration structure with just a few small changes.
+				<br>
+				<b>(main.c: 853)</b>
+        <div class="w3-card-4 w3-margin w3-white">
+<pre><code style="font-size: 12px; white-space: pre-wrap;">vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo);
+pvkCmdBuildAccelerationStructureKHR(commandBuffer, 1, buildGeometryInfo, buildOffsetInfos);
+vkEndCommandBuffer(commandBuffer);
+</code></pre>
+				</div>
+				<h6><b>Create, Bind, and Build Top Level Acceleration Structure</b></h6>
+        Now that we have a working bottom level acceleration structure, we need to create a top level acceleration structure to hold instances on the bottom level acceleration structure.
+        <br><br>
+        Just like setting up the bottom level acceleration structure, we first need to create the top level acceleration structure. The only notable difference is to use the <b>VK_GEOMETRY_TYPE_INSTANCES_KHR</b> flag instead of the <b>VK_GEOMETRY_TYPE_TRIANGLES_KHR</b> when describing the acceleration structure's geometry type.
+        <br>
+        <b>(main.c: 879)</b>
+        <div class="w3-card-4 w3-margin w3-white">
+<pre><code style="font-size: 12px; white-space: pre-wrap;">VkAccelerationStructureCreateGeometryTypeInfoKHR geometryInfos = {};
+geometryInfos.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_GEOMETRY_TYPE_INFO_KHR;
+geometryInfos.geometryType = VK_GEOMETRY_TYPE_INSTANCES_KHR;
+geometryInfos.maxPrimitiveCount = 1;
+geometryInfos.allowsTransforms = VK_TRUE;
+</code></pre>
+        </div>
+        Next, we need to bind the acceleration structure so it can be built.
+        <br><br>
+        After binding the acceleration structure, we need to build the acceleration structure using the bottom level acceleration structure we previously built. Instead of getting the device address of the vertex and index buffer, we need to get the address of the bottom level acceleration structure.
+        <br>
+        <b>(main.c: 931)</b>
+        <div class="w3-card-4 w3-margin w3-white">
+<pre><code style="font-size: 12px; white-space: pre-wrap;">VkAccelerationStructureDeviceAddressInfoKHR accelerationStructureDeviceAddressInfo = {};
+accelerationStructureDeviceAddressInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR;
+accelerationStructureDeviceAddressInfo.accelerationStructure = app->bottomLevelAccelerationStructure;
+
+VkDeviceAddress accelerationStructureDeviceAddress = pvkGetAccelerationStructureDeviceAddressKHR(app->logicalDevice, &accelerationStructureDeviceAddressInfo);
+</code></pre>
+        </div>
+        Now we can use that device address to propagate the acceleration structure geometry.
+        <br>
+        <b>(main.c: 937)</b>
+        <div class="w3-card-4 w3-margin w3-white">
+<pre><code style="font-size: 12px; white-space: pre-wrap;">VkAccelerationStructureInstanceKHR geometryInstance = {};
+geometryInstance.transform = transformMatrix;
+geometryInstance.instanceCustomIndex = 0;
+geometryInstance.mask = 0xFF;
+geometryInstance.instanceShaderBindingTableRecordOffset = 0;
+geometryInstance.flags = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR;
+geometryInstance.accelerationStructureReference = accelerationStructureDeviceAddress;
+</code></pre>
+        </div>
+        Since the top level acceleration structure can hold many instances of the same bottom level acceleration structure, we need to create instance buffer to hold all the instances that will be used for ray intersection. Since we only want a single instance of the bottom level acceleration structure, our instance buffer will only hold the instance that we just described.
+        <br>
+        <b>(main.c: 947)</b>
+        <div class="w3-card-4 w3-margin w3-white">
+<pre><code style="font-size: 12px; white-space: pre-wrap;">VkBuffer geometryInstanceStagingBuffer;
+VkDeviceMemory geometryInstanceStagingBufferMemory;
+createBuffer(app, geometryInstanceBufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &geometryInstanceStagingBuffer, &geometryInstanceStagingBufferMemory);
+
+void* geometryInstanceData;
+vkMapMemory(app->logicalDevice, geometryInstanceStagingBufferMemory, 0, geometryInstanceBufferSize, 0, &geometryInstanceData);
+memcpy(geometryInstanceData, &geometryInstance, geometryInstanceBufferSize);
+vkUnmapMemory(app->logicalDevice, geometryInstanceStagingBufferMemory);
+
+VkBuffer geometryInstanceBuffer;
+VkDeviceMemory geometryInstanceBufferMemory;
+createBuffer(app, geometryInstanceBufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_RAY_TRACING_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &geometryInstanceBuffer, &geometryInstanceBufferMemory);  
+
+copyBuffer(app, geometryInstanceStagingBuffer, geometryInstanceBuffer, geometryInstanceBufferSize);
+
+vkDestroyBuffer(app->logicalDevice, geometryInstanceStagingBuffer, NULL);
+vkFreeMemory(app->logicalDevice, geometryInstanceStagingBufferMemory, NULL);
+
+VkBufferDeviceAddressInfo geometryInstanceBufferDeviceAddressInfo = {};
+geometryInstanceBufferDeviceAddressInfo.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
+geometryInstanceBufferDeviceAddressInfo.buffer = geometryInstanceBuffer;
+
+VkDeviceAddress geometryInstanceBufferAddress = pvkGetBufferDeviceAddressKHR(app->logicalDevice, &geometryInstanceBufferDeviceAddressInfo);
+
+VkDeviceOrHostAddressConstKHR geometryInstanceDeviceOrHostAddressConst = {};
+geometryInstanceDeviceOrHostAddressConst.deviceAddress = geometryInstanceBufferAddress;
+
+VkAccelerationStructureGeometryInstancesDataKHR instancesData = {};
+instancesData.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_INSTANCES_DATA_KHR;
+instancesData.pNext = NULL;
+instancesData.arrayOfPointers = VK_FALSE;
+instancesData.data = geometryInstanceDeviceOrHostAddressConst; 
+</code></pre>
+        </div>
+        We also need to create a scratch buffer that will be used when building the acceleration structure
+        <br>
+        <b>(main.c: 1004)</b>
+        <div class="w3-card-4 w3-margin w3-white">
+<pre><code style="font-size: 12px; white-space: pre-wrap;">VkBuffer scratchBuffer;
+VkDeviceMemory scratchBufferMemory;
+createBuffer(app, scratchSize, VK_BUFFER_USAGE_RAY_TRACING_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &scratchBuffer, &scratchBufferMemory);
+
+VkBufferDeviceAddressInfo scratchBufferDeviceAddressInfo = {};
+scratchBufferDeviceAddressInfo.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
+scratchBufferDeviceAddressInfo.buffer = scratchBuffer;
+
+VkDeviceAddress scratchBufferAddress = pvkGetBufferDeviceAddressKHR(app->logicalDevice, &scratchBufferDeviceAddressInfo);
+
+VkDeviceOrHostAddressKHR scratchDeviceOrHostAddress = {};
+scratchDeviceOrHostAddress.deviceAddress = scratchBufferAddress;
+
+const VkAccelerationStructureBuildGeometryInfoKHR* buildGeometryInfo = &(VkAccelerationStructureBuildGeometryInfoKHR){
+  .sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR,
+  .pNext = NULL,
+  .type = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR,
+  .flags = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR,
+  .update = VK_FALSE,
+  .srcAccelerationStructure = VK_NULL_HANDLE,
+  .dstAccelerationStructure = app->topLevelAccelerationStructure,
+  .geometryArrayOfPointers = VK_TRUE,
+  .geometryCount = 1,
+  .ppGeometries = geometries,
+  .scratchData = scratchDeviceOrHostAddress
+};
+
+const VkAccelerationStructureBuildOffsetInfoKHR* buildOffsetInfoPtr = &(VkAccelerationStructureBuildOffsetInfoKHR){
+  .primitiveCount = 1,
+  .primitiveOffset = 0,
+  .firstVertex = 0,
+  .transformOffset = 0  
+};
+const VkAccelerationStructureBuildOffsetInfoKHR** buildOffsetInfos = &buildOffsetInfoPtr;
+</code></pre>
+        </div>
+        With everything setup, we can finally build the top level acceleration structure
+        <br>
+        <b>(main.c: 1052)</b>
+        <div class="w3-card-4 w3-margin w3-white">
+<pre><code style="font-size: 12px; white-space: pre-wrap;">vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo);
+pvkCmdBuildAccelerationStructureKHR(commandBuffer, 1, buildGeometryInfo, buildOffsetInfos);
+vkEndCommandBuffer(commandBuffer);
+</code></pre>
+        </div>
+        <h4><b>Descriptor Setup</b></h4>
+        <h6><b>Create Uniform Buffer</b></h6>
       </p>
     </div>
   </div>
