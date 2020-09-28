@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+<link rel="stylesheet" href="style.css">
 <style>
   body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
 </style>
@@ -23,6 +24,14 @@
   <div class="w3-card-4 w3-margin w3-white">
     <div class="w3-container">
       <h2><b>Introduction to the Tutorial</b></h2>
+      <div class="row">
+        <div class="column">
+          <img style="border: 5px solid #555; width: 100%;" src="res/a.png">
+        </div>
+        <div class="column">
+          <img style="border: 5px solid #555; width: 100%;" src="res/b.png">
+        </div>
+      </div>
       <h4><b>Prerequisites and Resources</b></h4>
       <p>
       	A basic understanding of Vulkan is recommended; this tutorial focuses specifically on the <b>VK_KHR_ray_tracing</b> extension for Vulkan. The tutorial will not cover in depth the general topics of Vulkan, but will describe all the procedures involving ray tracing; there are many great online resources for learning Vulkan so rather than rewriting their information, I will just provide the links to their websites.
@@ -551,6 +560,8 @@ vkEndCommandBuffer(commandBuffer);
         </div>
         <h4><b>Descriptor Setup</b></h4>
         <h6><b>Create Uniform Buffer</b></h6>
+        We create a uniform buffer to hold the <b>camera</b> so we can pass the camera's data into the shaders.
+        <h6><b>Create Descriptor Sets</b></h6>
       </p>
     </div>
   </div>
