@@ -780,6 +780,149 @@ if (pvkCreateRayTracingPipelinesKHR(app->logicalDevice, VK_NULL_HANDLE, 1, &rayP
 }
 </code></pre>
         </div>
+        <h6><b>Create Shader Binding Table</b></h6>
+        The shader binding table holds the handles of all the shaders and will be used to determine which shader should be executed. Since we have 4 shaders, 1 ray generation, 1 ray closest hit, and 2 ray miss, we must make sure that all the shader handles will fit within the shader binding table buffer.
+        <b>(main.c: 1511)</b>
+        <div class="w3-card-4 w3-margin w3-white">
+<pre><code style="font-size: 12px; white-space: pre-wrap;">VkDeviceSize shaderBindingTableSize = app->rayTracingProperties.shaderGroupHandleSize * 4;
+
+app->shaderBindingTableBufferMemory;
+createBuffer(app, shaderBindingTableSize, VK_BUFFER_USAGE_RAY_TRACING_BIT_KHR, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &app->shaderBindingTableBuffer, &app->shaderBindingTableBufferMemory);
+
+void* shaderHandleStorage = (void*)malloc(sizeof(uint8_t) * shaderBindingTableSize);
+if (pvkGetRayTracingShaderGroupHandlesKHR(app->logicalDevice, app->rayTracePipeline, 0, 4, shaderBindingTableSize, shaderHandleStorage) == VK_SUCCESS) {
+  printf("got ray tracing shader group handles\n");
+}
+
+void* data;
+vkMapMemory(app->logicalDevice, app->shaderBindingTableBufferMemory, 0, shaderBindingTableSize, 0, &data);
+for (int x = 0; x < 4; x++) {
+  memcpy(data, (uint8_t*)shaderHandleStorage + x * app->rayTracingProperties.shaderGroupHandleSize, app->rayTracingProperties.shaderGroupHandleSize);
+  data += app->rayTracingProperties.shaderGroupBaseAlignment;
+}
+vkUnmapMemory(app->logicalDevice, app->shaderBindingTableBufferMemory);
+
+free(shaderHandleStorage);
+</code></pre>
+        </div>
+        <h4><b>Command Buffers</b></h4>
+        When tracing rays, we need to provide all the shader handle information. The first handle will be the ray generation shader which will be offset 0. The handles will be for the two ray miss shaders which will be offset 1. The last handle will be the ray closest hit shader which will be offset 3.
+        <b>(main.c: 1551)</b>
+        <div class="w3-card-4 w3-margin w3-white">
+<pre><code style="font-size: 12px; white-space: pre-wrap;">VkDeviceSize progSize = app->rayTracingProperties.shaderGroupBaseAlignment;
+VkDeviceSize rayGenOffset = 0u * progSize;
+VkDeviceSize missOffset = 1u * progSize;
+VkDeviceSize hitGroupOffset = 3u * progSize;
+
+VkDeviceSize sbtSize = progSize * (VkDeviceSize)4;
+
+const VkStridedBufferRegionKHR rgenShaderBindingTable = {
+  .buffer = app->shaderBindingTableBuffer,
+  .offset = rayGenOffset,
+  .stride = progSize,
+  .size = sbtSize 
+};
+
+const VkStridedBufferRegionKHR rmissShaderBindingTable = {
+  .buffer = app->shaderBindingTableBuffer,
+  .offset = missOffset,
+  .stride = progSize,
+  .size = sbtSize 
+};
+
+const VkStridedBufferRegionKHR rchitShaderBindingTable = {
+  .buffer = app->shaderBindingTableBuffer,
+  .offset = hitGroupOffset,
+  .stride = progSize,
+  .size = sbtSize 
+};
+</code></pre>
+        </div>
+        Now we begin the command buffer. First, we need to add the commands to bind the pipeline and two descriptor sets we previosly created.
+        <b>(main.c: 1588)</b>
+        <div class="w3-card-4 w3-margin w3-white">
+<pre><code style="font-size: 12px; white-space: pre-wrap;">if (vkBeginCommandBuffer(app->commandBuffers[x], &commandBufferBeginCreateInfo) == VK_SUCCESS) {
+  printf("\033[22;32m%s%d\033[0m\n", "began recording command buffer for image #", x);
+}
+  
+vkCmdBindPipeline(app->commandBuffers[x], VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, app->rayTracePipeline);
+vkCmdBindDescriptorSets(app->commandBuffers[x], VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, app->rayTracePipelineLayout, 0, 1, &app->rayTraceDescriptorSet, 0, 0);
+vkCmdBindDescriptorSets(app->commandBuffers[x], VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, app->rayTracePipelineLayout, 1, 1, &app->materialDescriptorSet, 0, 0);
+</code></pre>
+        </div>
+        We add the command to trace the rays using the shader handle information and the ray dimensions 800x600.
+        <b>(main.c: 1596)</b>
+        <div class="w3-card-4 w3-margin w3-white">
+<pre><code style="font-size: 12px; white-space: pre-wrap;">pvkCmdTraceRaysKHR(app->commandBuffers[x], &rgenShaderBindingTable, &rmissShaderBindingTable, &rchitShaderBindingTable, &callableShaderBindingTable, 800, 600, 1);
+</code></pre>
+        </div>
+        When the trace ray command is executed, a ray traced image will be produced. To have the image on the screen, we must copy the image to the swapchain for presentation. We have to set the pipeline barriers for both the ray traced and swapchain image. The ray traced image's new layout will be set to <b>VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL</b> while the swapchain image's new layout will be set to <b>VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL</b>.
+        <b>(main.c: 1598)</b>
+        <div class="w3-card-4 w3-margin w3-white">
+<pre><code style="font-size: 12px; white-space: pre-wrap;">{ 
+  VkImageMemoryBarrier imageMemoryBarrier = {};
+  imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+  imageMemoryBarrier.pNext = NULL;
+  imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+  imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+  imageMemoryBarrier.image = app->rayTraceImage;
+  imageMemoryBarrier.subresourceRange = subresourceRange;
+  imageMemoryBarrier.srcAccessMask = 0;
+  imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+
+  vkCmdPipelineBarrier(app->commandBuffers[x], VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, NULL, 0, NULL, 1, &imageMemoryBarrier);
+}
+
+{ 
+  VkImageMemoryBarrier imageMemoryBarrier = {};
+  imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+  imageMemoryBarrier.pNext = NULL;
+  imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+  imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+  imageMemoryBarrier.image = app->swapchainImages[x];
+  imageMemoryBarrier.subresourceRange = subresourceRange;
+  imageMemoryBarrier.srcAccessMask = 0;
+  imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+
+  vkCmdPipelineBarrier(app->commandBuffers[x], VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, NULL, 0, NULL, 1, &imageMemoryBarrier);
+}
+</code></pre>
+        </div>
+        We add a command to copy the ray traced image to the swapchain.
+        <b>(main.c: 1627)</b>
+        <div class="w3-card-4 w3-margin w3-white">
+<pre><code style="font-size: 12px; white-space: pre-wrap;">{
+  VkImageSubresourceLayers subresourceLayers = {};
+  subresourceLayers.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+  subresourceLayers.mipLevel = 0;
+  subresourceLayers.baseArrayLayer = 0;
+  subresourceLayers.layerCount = 1;
+
+  VkOffset3D offset = {};
+  offset.x = 0;
+  offset.y = 0;
+  offset.z = 0;
+
+  VkExtent3D extent = {};
+  extent.width = 800;
+  extent.height = 600;
+  extent.depth = 1;
+
+  VkImageCopy imageCopy = {};
+  imageCopy.srcSubresource = subresourceLayers;
+  imageCopy.srcOffset = offset;
+  imageCopy.dstSubresource = subresourceLayers;
+  imageCopy.dstOffset = offset;
+  imageCopy.extent = extent;
+
+  vkCmdCopyImage(app->commandBuffers[x], app->rayTraceImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, app->swapchainImages[x], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &imageCopy);
+}
+</code></pre>
+        </div>
+        Now that we have copied the ray traced image to the swapchain image, we set the swapchain image's new layout to <b>VK_IMAGE_LAYOUT_PRESENT_SRC_KHR</b> and end the command buffer.
+        <br><br>
+        <h4><b>Main Loop</b></h4>
+        When compared to a "standard non-raytraced" application, there are no major differences when creating the syncronization objects or writing the main loop. When cleaning up the program, you must make sure to clean up all the new structures made from ray tracing (ex: acceleration structure, ray tracing pipeline, ray traced image, etc...).
       </p>
     </div>
   </div>
