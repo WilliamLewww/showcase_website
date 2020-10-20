@@ -602,7 +602,7 @@ if (vkCreateDescriptorPool(app->logicalDevice, &descriptorPoolCreateInfo, NULL, 
 }
 </code></pre>
         </div>
-        We are separating the structures that deal with materials into their own descriptor set. So we have 1 descriptor set that will hold the acceleration structure, ray traced image, camera, vertex index buffer, and vertex postion buffer. The other descriptor set will hold the material index buffer and the material buffer.
+        We are separating the structures that deal with materials into their own descriptor set. So we have 1 descriptor set that will hold the acceleration structure, ray traced image, camera, vertex index buffer, and vertex position buffer. The other descriptor set will hold the material index buffer and the material buffer.
         <br><br>
         Let's set up the first descriptor set. We first need to set up the descriptor set layout to indicate which structures will be accessed by which binding.
         <br>
@@ -680,7 +680,7 @@ vkUpdateDescriptorSets(app->logicalDevice, 5, writeDescriptorSets, 0, NULL);
         <br><br>
         <h4><b>Ray Tracing Pipeline</b></h4>
         <h6><b>Create Ray Tracing Pipeline</b></h6>
-        Our ray tracing pipeline uses the following 4 shaders: raytrace.rgen, raytrace.rmiss, raytrace_shadow.rmiss, and raytrace.rchit. First, the rays are generated with the raytrace.rgen shader stage which are then casted onto the acceleration structure. If the ray interesects geometry, the raytrace.rchit shader stage will handle the ray's payload. If the ray does not intersect any geometry, the raytrace.rchit shader stage will handle the ray's payload.
+        Our ray tracing pipeline uses the following 4 shaders: raytrace.rgen, raytrace.rmiss, raytrace_shadow.rmiss, and raytrace.rchit. First, the rays are generated with the raytrace.rgen shader stage which are then casted onto the acceleration structure. If the ray intersects geometry, the raytrace.rchit shader stage will handle the ray's payload. If the ray does not intersect any geometry, the raytrace.rchit shader stage will handle the ray's payload.
         <br><br>
         We load the shaders just like how we would load a vertex or fragment shader. The only difference is setting the shader stage info to the correct shader stage.
         <b>(main.c: 1391)</b>
@@ -712,7 +712,7 @@ rchitShaderStageInfo.pName = "main";
 VkPipelineShaderStageCreateInfo shaderStages[4] = {rgenShaderStageInfo, rmissShaderStageInfo, rmissShadowShaderStageInfo, rchitShaderStageInfo};
 </code></pre>
         </div>
-        We now create the shader groups to contain the previosly described shader stages.
+        We now create the shader groups to contain the previously described shader stages.
         <b>(main.c: 1417)</b>
         <div class="w3-card-4 w3-margin w3-white">
 <pre><code style="font-size: 12px; white-space: pre-wrap;">VkRayTracingShaderGroupCreateInfoKHR shaderGroupCreateInfos[4];
@@ -737,7 +737,7 @@ shaderGroupCreateInfos[3].intersectionShader = VK_SHADER_UNUSED_KHR;
 shaderGroupCreateInfos[3].pShaderGroupCaptureReplayHandle = NULL;
 </code></pre>
         </div>
-        The pipeline layout can be created using the previosly created descriptor set layouts.
+        The pipeline layout can be created using the previously created descriptor set layouts.
         <b>(main.c: 1454)</b>
         <div class="w3-card-4 w3-margin w3-white">
 <pre><code style="font-size: 12px; white-space: pre-wrap;">VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = {};
@@ -838,7 +838,7 @@ const VkStridedBufferRegionKHR rchitShaderBindingTable = {
 };
 </code></pre>
         </div>
-        Now we begin the command buffer. First, we need to add the commands to bind the pipeline and two descriptor sets we previosly created.
+        Now we begin the command buffer. First, we need to add the commands to bind the pipeline and two descriptor sets we previously created.
         <b>(main.c: 1588)</b>
         <div class="w3-card-4 w3-margin w3-white">
 <pre><code style="font-size: 12px; white-space: pre-wrap;">if (vkBeginCommandBuffer(app->commandBuffers[x], &commandBufferBeginCreateInfo) == VK_SUCCESS) {
@@ -922,7 +922,7 @@ vkCmdBindDescriptorSets(app->commandBuffers[x], VK_PIPELINE_BIND_POINT_RAY_TRACI
         Now that we have copied the ray traced image to the swapchain image, we set the swapchain image's new layout to <b>VK_IMAGE_LAYOUT_PRESENT_SRC_KHR</b> and end the command buffer.
         <br><br>
         <h4><b>Main Loop</b></h4>
-        When compared to a "standard non-raytraced" application, there are no major differences when creating the syncronization objects or writing the main loop. When cleaning up the program, you must make sure to clean up all the new structures made from ray tracing (ex: acceleration structure, ray tracing pipeline, ray traced image, etc...).
+        When compared to a "standard non-raytraced" application, there are no major differences when creating the synchronization objects or writing the main loop. When cleaning up the program, you must make sure to clean up all the new structures made from ray tracing (ex: acceleration structure, ray tracing pipeline, ray traced image, etc...).
       </p>
     </div>
   </div>
