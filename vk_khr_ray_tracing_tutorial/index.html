@@ -219,7 +219,7 @@
         <br>
         <h4><b>Vulkan Setup</b></h4>
         <h6><b>Initialize Vulkan Context</b></h6>
-        When initializing Vulkan, we must make sure to include Vulkan instance extension that is required to use the VK_KHR_ray_tracing extension. In this case, we include the <b>VK_KHR_get_physical_device_properties2</b> extension to our array of instance extensions.
+        When initializing Vulkan, we must make sure to include the Vulkan instance extension that is required to use the VK_KHR_ray_tracing extension. In this case, we include the <b>VK_KHR_get_physical_device_properties2</b> extension to our array of instance extensions.
         <br>
         <b>(main.c: 287)</b>
         <div class="w3-card-4 w3-margin w3-white">
@@ -634,6 +634,7 @@ if (vkCreateDescriptorSetLayout(app->logicalDevice, &descriptorSetLayoutCreateIn
 </code></pre>
         </div>
         Now that we have the layout to the first descriptor set, we can update the descriptor sets with the addresses of the structures.
+        <br>
         <b>(main.c: 1155)</b>
         <div class="w3-card-4 w3-margin w3-white">
 <pre><code style="font-size: 12px; white-space: pre-wrap;">VkWriteDescriptorSet writeDescriptorSets[5];
@@ -683,6 +684,7 @@ vkUpdateDescriptorSets(app->logicalDevice, 5, writeDescriptorSets, 0, NULL);
         Our ray tracing pipeline uses the following 4 shaders: raytrace.rgen, raytrace.rmiss, raytrace_shadow.rmiss, and raytrace.rchit. First, the rays are generated with the raytrace.rgen shader stage which are then casted onto the acceleration structure. If the ray intersects geometry, the raytrace.rchit shader stage will handle the ray's payload. If the ray does not intersect any geometry, the raytrace.rchit shader stage will handle the ray's payload.
         <br><br>
         We load the shaders just like how we would load a vertex or fragment shader. The only difference is setting the shader stage info to the correct shader stage.
+        <br>
         <b>(main.c: 1391)</b>
         <div class="w3-card-4 w3-margin w3-white">
 <pre><code style="font-size: 12px; white-space: pre-wrap;">VkPipelineShaderStageCreateInfo rgenShaderStageInfo = {};
@@ -713,6 +715,7 @@ VkPipelineShaderStageCreateInfo shaderStages[4] = {rgenShaderStageInfo, rmissSha
 </code></pre>
         </div>
         We now create the shader groups to contain the previously described shader stages.
+        <br>
         <b>(main.c: 1417)</b>
         <div class="w3-card-4 w3-margin w3-white">
 <pre><code style="font-size: 12px; white-space: pre-wrap;">VkRayTracingShaderGroupCreateInfoKHR shaderGroupCreateInfos[4];
@@ -738,6 +741,7 @@ shaderGroupCreateInfos[3].pShaderGroupCaptureReplayHandle = NULL;
 </code></pre>
         </div>
         The pipeline layout can be created using the previously created descriptor set layouts.
+        <br>
         <b>(main.c: 1454)</b>
         <div class="w3-card-4 w3-margin w3-white">
 <pre><code style="font-size: 12px; white-space: pre-wrap;">VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = {};
@@ -752,6 +756,7 @@ if (vkCreatePipelineLayout(app->logicalDevice, &pipelineLayoutCreateInfo, NULL, 
 </code></pre>
         </div>
         With all the structures we just defined, we can finally create the ray tracing pipeline!
+        <br>
         <b>(main.c: 1464)</b>
         <div class="w3-card-4 w3-margin w3-white">
 <pre><code style="font-size: 12px; white-space: pre-wrap;">VkPipelineLibraryCreateInfoKHR pipelineLibraryCreateInfo = {};
@@ -782,6 +787,7 @@ if (pvkCreateRayTracingPipelinesKHR(app->logicalDevice, VK_NULL_HANDLE, 1, &rayP
         </div>
         <h6><b>Create Shader Binding Table</b></h6>
         The shader binding table holds the handles of all the shaders and will be used to determine which shader should be executed. Since we have 4 shaders, 1 ray generation, 1 ray closest hit, and 2 ray miss, we must make sure that all the shader handles will fit within the shader binding table buffer.
+        <br>
         <b>(main.c: 1511)</b>
         <div class="w3-card-4 w3-margin w3-white">
 <pre><code style="font-size: 12px; white-space: pre-wrap;">VkDeviceSize shaderBindingTableSize = app->rayTracingProperties.shaderGroupHandleSize * 4;
@@ -807,6 +813,7 @@ free(shaderHandleStorage);
         </div>
         <h4><b>Command Buffers</b></h4>
         When tracing rays, we need to provide all the shader handle information. The first handle will be the ray generation shader which will be offset 0. The handles will be for the two ray miss shaders which will be offset 1. The last handle will be the ray closest hit shader which will be offset 3.
+        <br>
         <b>(main.c: 1551)</b>
         <div class="w3-card-4 w3-margin w3-white">
 <pre><code style="font-size: 12px; white-space: pre-wrap;">VkDeviceSize progSize = app->rayTracingProperties.shaderGroupBaseAlignment;
@@ -839,6 +846,7 @@ const VkStridedBufferRegionKHR rchitShaderBindingTable = {
 </code></pre>
         </div>
         Now we begin the command buffer. First, we need to add the commands to bind the pipeline and two descriptor sets we previously created.
+        <br>
         <b>(main.c: 1588)</b>
         <div class="w3-card-4 w3-margin w3-white">
 <pre><code style="font-size: 12px; white-space: pre-wrap;">if (vkBeginCommandBuffer(app->commandBuffers[x], &commandBufferBeginCreateInfo) == VK_SUCCESS) {
@@ -851,12 +859,14 @@ vkCmdBindDescriptorSets(app->commandBuffers[x], VK_PIPELINE_BIND_POINT_RAY_TRACI
 </code></pre>
         </div>
         We add the command to trace the rays using the shader handle information and the ray dimensions 800x600.
+        <br>
         <b>(main.c: 1596)</b>
         <div class="w3-card-4 w3-margin w3-white">
 <pre><code style="font-size: 12px; white-space: pre-wrap;">pvkCmdTraceRaysKHR(app->commandBuffers[x], &rgenShaderBindingTable, &rmissShaderBindingTable, &rchitShaderBindingTable, &callableShaderBindingTable, 800, 600, 1);
 </code></pre>
         </div>
         When the trace ray command is executed, a ray traced image will be produced. To have the image on the screen, we must copy the image to the swapchain for presentation. We have to set the pipeline barriers for both the ray traced and swapchain image. The ray traced image's new layout will be set to <b>VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL</b> while the swapchain image's new layout will be set to <b>VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL</b>.
+        <br>
         <b>(main.c: 1598)</b>
         <div class="w3-card-4 w3-margin w3-white">
 <pre><code style="font-size: 12px; white-space: pre-wrap;">{ 
@@ -889,6 +899,7 @@ vkCmdBindDescriptorSets(app->commandBuffers[x], VK_PIPELINE_BIND_POINT_RAY_TRACI
 </code></pre>
         </div>
         We add a command to copy the ray traced image to the swapchain.
+        <br>
         <b>(main.c: 1627)</b>
         <div class="w3-card-4 w3-margin w3-white">
 <pre><code style="font-size: 12px; white-space: pre-wrap;">{
