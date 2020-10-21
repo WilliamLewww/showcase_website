@@ -432,7 +432,7 @@ vkEndCommandBuffer(commandBuffer);
 </code></pre>
 				</div>
 				<h6><b>Create, Bind, and Build Top Level Acceleration Structure</b></h6>
-        Now that we have a working bottom level acceleration structure, we need to create a top level acceleration structure to hold instances on the bottom level acceleration structure. The process is basically the same as creating, binding, and building the bottom level acceleration structure with just a few small changes.
+        Now that we have a working bottom level acceleration structure, we need to create a top level acceleration structure to hold instances of the bottom level acceleration structure. The process is basically the same as creating, binding, and building the bottom level acceleration structure with just a few small changes.
 
         <br><br>
         Just like setting up the bottom level acceleration structure, we first need to create the top level acceleration structure. The only notable difference is to use the <b>VK_GEOMETRY_TYPE_INSTANCES_KHR</b> flag instead of the <b>VK_GEOMETRY_TYPE_TRIANGLES_KHR</b> when describing the acceleration structure's geometry type.
